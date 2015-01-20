@@ -1,0 +1,110 @@
+[GTER] Analise de trafego por ASN sem BGP
+Rubens Kuhl Jr. rubensk em gmail.com
+Sexta Fevereiro 10 15:48:07 BRST 2006
+
+    Mensagem anterior: [GTER] Política de Roteamento
+    Próxima mensagem: [GTER] Analise de trafego por ASN sem BGP
+    Messages sorted by: [ date ] [ thread ] [ subject ] [ author ]
+
+Ao revisitar o tema de como fazer análise de tráfego por ASN sem que
+se tenha a tabela de roteamento global no roteador (quer pq só há BGP
+parcial, quer por nem haver BGP ainda), que havia sido abordado na
+GTER19 pelo Eduardo Ascenço
+(ftp://ftp.registro.br/pub/gter/gter19/12-roteamento-parcial.pdf), eu
+acabei chegando em uma solução um pouco diferente da dele e que torno
+aqui pública (a próxima reunião do GTER ainda está meio longe...).
+
+O primeiro insumo para essa alternativa é algo que apesar de não ter
+encontrado citação em nenhum lugar funciona bem: já há um zone-file
+DNS gerado automaticamente pelo projeto Route-Views para consulta de
+ASN origem de um IP usando nslookup. O zone-file fica em
+(http://archive.routeviews.org/dnszones/originas.bz2) (há também
+a versão descompactada e ambas podem ser acessadas também por ftp), e
+é atualizado pelo menos diariamente.
+
+O porém do formato zone-file é gerar um arquivo grande que é ruim para
+manipulação direta; assim eu preferi simplificar o arquivo usando o
+seguinte comando:
+$ bzcat originas.zone.bz2 | awk -F\" '/^[^@].*\"/ { print $2,$4,$6 }' | uniq >
+originas.txt
+
+Isso gerou um arquivo com linhas apenas com ASN, prefixo e máscara.
+Com um arquivo de prefixos mais digerível, a questão é como gerar
+relatórios por ASN... eu observei que teria menos trabalho se
+conseguisse marcar os ASNs nos flow originais, usando assim as
+ferramentas de relatório já integrante do flow-tools. Também se
+mostrou mais simples fazer a modificação usando formato ASCII e Perl,
+e o resultado ficou assim:
+
+$ flow-cat ft-v05.2001-05-01.* | flow-export -f 2 | grep -v \# |
+./flow-asn.pl | flow-import -V5 -z0 -f2 | flow-report -v
+TYPE=source-as -v SORT=+octets -v OPTIONS=+percent-total,+names
+
+Da linha de comando acima, só flow-asn.pl não vem no pacote do
+flow-tools. Ele foi adaptado a partir de
+http://insomnia.juniks.net/~kll/sflow1, um script de objetivo similar
+para sflow (Foundry, outros) escrito por Kristian Larsson. Ele mapeia
+os prefixos e ASs de origem numa tabela de roteamento usando uma
+estrutura de dados bastante empregada em códigos de roteamento, uma
+Patricia trie.
+
+
+------------------------- cut here -----------------------
+#!/usr/bin/perl
+
+  use Net::Patricia;
+  my $pt = new Net::Patricia;
+
+# Origin prefixes by ASNs
+
+print STDERR "Loading prefix file into memory... ";
+open (fil, "originas.txt");
+@db = <fil>;
+close(fil);
+print STDERR "done.\n";
+
+print STDERR "Creating data structure... ";
+foreach $rrow(@db) {
+    my ($rAS,$rnet, $rmask) = split(/\s+/, $rrow);
+    $pt->add_string("$rnet/$rmask", $rAS);
+}
+print STDERR "done.\n";
+
+while (<STDIN>) {
+  @row=split(",");
+
+  $row[22]=$pt->match_string($row[10]);
+  $row[23]=$pt->match_string($row[11]);
+    print join(",", @row) . "\n"
+}
+
+---------------- cut here ----------------------
+	
+Vale reparar que como é possível que a organização nem tenha ainda um
+AS ou espaço CIDR, é necessário definir os IPs locais no arquivo
+originas.txt usando um ASN privado (ex: 65001) para que se façam
+análises coerentes de origem/destino do tráfego. Isso também pode ser
+feito com mais de uma organização, por exemplo num caso de diversas
+instituições de uma mesma área geográfica que queiram avaliar o
+interesse total de troca de tráfego entre elas para estabelecimento de
+um PTT.
+
+Possíveis desenvolvimento destas idéias:
+- Classificação de prefixos ou ASNs em função de país para análise
+local/internacional. O campo flow-tag parece apropriado para isso.
+- Mudança para programa em C, que também dispõe da biblioteca
+libPatricia, tratando o fluxo em binário. Isso garantiria performance
+para análises online.
+
+Se quem testar puder me dar um feedback, eu agradeço... mas minha
+maior esperança é de que alguém seja mordido pelo bicho da codificação
+e aperfeiçoe o que está aqui.
+
+Rubens
+
+    Mensagem anterior: [GTER] Política de Roteamento
+    Próxima mensagem: [GTER] Analise de trafego por ASN sem BGP
+    Messages sorted by: [ date ] [ thread ] [ subject ] [ author ]
+
+More information about the gter mailing list
+

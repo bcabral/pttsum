@@ -1,0 +1,32 @@
+CREATE DATABASE IF NOT EXISTS `netflow` DEFAULT CHARACTER SET utf8;
+USE `netflow`;
+DROP TABLE IF EXISTS `flows`;
+CREATE TABLE `flows` (
+ `FLOW_ID` int(32) NOT NULL AUTO_INCREMENT,
+ `UNIX_SECS` int(32) unsigned NOT NULL default '0',
+ `UNIX_NSECS` int(32) unsigned NOT NULL default '0',
+ `SYSUPTIME` int(20) NOT NULL,
+ `EXADDR` varchar(16) NOT NULL,
+ `DPKTS` int(32) unsigned NOT NULL default '0',
+ `DOCTETS` int(32) unsigned NOT NULL default '0',
+ `FIRST` int(32) unsigned NOT NULL default '0',
+ `LAST` int(32) unsigned NOT NULL default '0',
+ `ENGINE_TYPE` int(10) NOT NULL,
+ `ENGINE_ID` int(15) NOT NULL,
+ `SRCADDR` varchar(16) NOT NULL default '0',
+ `DSTADDR` varchar(16) NOT NULL default '0',
+ `NEXTHOP` varchar(16) NOT NULL default '0',
+ `INPUT` int(16) unsigned NOT NULL default '0',
+ `OUTPUT` int(16) unsigned NOT NULL default '0',
+ `SRCPORT` int(16) unsigned NOT NULL default '0',
+ `DSTPORT` int(16) unsigned NOT NULL default '0',
+ `PROT` int(8) unsigned NOT NULL default '0',
+ `TOS` int(2) NOT NULL,
+ `TCP_FLAGS` int(8) unsigned NOT NULL default '0',
+ `SRC_MASK` int(8) unsigned NOT NULL default '0',
+ `DST_MASK` int(8) unsigned NOT NULL default '0',
+ `SRC_AS` int(16) unsigned NOT NULL default '0',
+ `DST_AS` int(16) unsigned NOT NULL default '0',
+ PRIMARY KEY (FLOW_ID)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
+	<meta name="author" content="Bruno L F Cabral">
+	<title>Tráfego recebido do PTT</title>
+	<script type="text/javascript" src="http://raw.githubusercontent.com/nnnick/Chart.js/master/Chart.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<style>
+	h1 {
+		text-align: center
+	}
+	canvas {
+		position: absolute;
+		left: 0;
+		right: 0;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	</style>
+</head>
+<body>
+	<h1>Tráfego recebido do PTT</h1>
+	<canvas id="myChart" width="640" height="400"></canvas>
+<pre>
+IFPB - Redes de Computadores
+Disciplina: Desenvolvimento Web
+Aluno: Bruno L F Cabral
+</pre>
+	<script>
+	  var url = 'executa.php';
+  	  $.getJSON( url, function (data) { 
+	    var ctx = document.getElementById("myChart").getContext("2d");
+	    var myNewChart = new Chart(ctx).Doughnut(data);
+	  });
+	</script>
+</body>
+</html>
