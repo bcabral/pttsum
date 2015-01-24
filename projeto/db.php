@@ -29,9 +29,9 @@ $debug = 0;
 
   function sumAll($array, $ptt){
     global $connection;
-    $resultSet = $connection->prepare("SELECT SUM(DOCTETS) AS resultado FROM flows WHERE DST_AS " . ($ptt?"":"NOT") . " IN (".implode(",",$array).")");	
+    $resultSet = $connection->prepare("SELECT SUM(DOCTETS) AS resultado FROM flows WHERE SRC_AS " . ($ptt?"":"NOT") . " IN (".implode(",",$array).")");	
     $resultSet->execute();
-    if($debug) echo "\nSELECT SUM(doctets) AS resultado FROM flows WHERE dst_as " . ($ptt?"":"NOT") . " IN (".implode(",",$array).")\n";
+    if($debug) echo "\nSELECT SUM(doctets) AS resultado FROM flows WHERE src_as " . ($ptt?"":"NOT") . " IN (".implode(",",$array).")\n";
     return $resultSet->fetch();
   }
 
