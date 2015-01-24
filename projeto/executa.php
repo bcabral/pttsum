@@ -13,8 +13,9 @@
   header("Content-type: application/json");
   require_once("db.php");
 
-  $url = "participantes.php";
+  $url = "http://localhost/projeto/participantes.php?".$_SERVER['QUERY_STRING'];
   $array = json_decode(file_get_contents($url), true);
+
   // PHP 5.3 needs temporary variable to access array element returned by func
   $tmp = sumAll($array,false);
   $resto = intval($tmp[0]);
@@ -31,7 +32,7 @@
 	"value" => $ptt, 
 	"color" => "#46BFBD",
 	"highlight" => "#5AD3D1",
-	"label" => "PTT ".$pttp."%"
+	"label" => "PTT ".$_SERVER['QUERY_STRING']." ".$pttp."%"
     ),
     array(
 	"value" => $resto,

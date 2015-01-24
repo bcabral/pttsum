@@ -21,18 +21,46 @@
 </head>
 <body>
 	<h1>Tráfego recebido do PTT</h1>
+	<select name="localidade" id="localidade" onchange="changeUrl();"></select>
+	<script>
+	  var url = 'localidades.php';
+ 	  var html = "";
+	  $.getJSON( url, function (data) { 
+	    $.each(data, function(key, value) {
+	      html += "<option value=" + value.option;
+	      html += ">" + value.text + "</option>";
+	    });
+	    document.getElementById("localidade").innerHTML = html;
+	  });
+	</script>
 	<canvas id="myChart" width="640" height="400"></canvas>
 <pre>
-IFPB - Redes de Computadores
+IFPB - CST em Redes de Computadores
 Disciplina: Desenvolvimento Web
+Professor: Luis Carlos
 Aluno: Bruno L F Cabral
 </pre>
 	<script>
-	  var url = 'executa.php';
-  	  $.getJSON( url, function (data) { 
-	    var ctx = document.getElementById("myChart").getContext("2d");
-	    var myNewChart = new Chart(ctx).Doughnut(data);
-	  });
+	  var ctx = document.getElementById("myChart").getContext("2d");
+	  var myNewChart = new Chart(ctx).Doughnut();
+	  function changeUrl() {
+            var mylocal = $('#localidade').val();
+//	    console.log(mylocal);
+	    if( mylocal != "" ) {
+	      $('#myChart').show();
+	      var url = 'executa.php?'+mylocal;
+  	      $.getJSON( url, function (data) { 
+		while (myNewChart.segments.length) 
+		  myNewChart.removeData();
+		data.forEach( function( segment, index ) {
+	          myNewChart.addData(segment,index);
+		});
+	        myNewChart.update();
+	      });
+	    } else {
+	      $('#myChart').hide();
+	    }
+	  }
 	</script>
 </body>
 </html>

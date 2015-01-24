@@ -10,6 +10,8 @@
   TODO: tratar array vazio
 */
 
+$debug = 0;
+
   function getDBConnection($dbname = "netflow"){
     $user = "root";
     $password = "123";
@@ -27,15 +29,18 @@
 
   function sumAll($array, $ptt){
     global $connection;
-    $resultSet = $connection->prepare("SELECT SUM(DOCTETS) AS resultado FROM flows WHERE DST_AS " . ($ptt?"":"NOT") . " IN (:array)");	
-    $resultSet->bindValue(":array", (string) $array);
+    $resultSet = $connection->prepare("SELECT SUM(DOCTETS) AS resultado FROM flows WHERE DST_AS " . ($ptt?"":"NOT") . " IN (".implode(",",$array).")");	
     $resultSet->execute();
+    if($debug) echo "\nSELECT SUM(doctets) AS resultado FROM flows WHERE dst_as " . ($ptt?"":"NOT") . " IN (".implode(",",$array).")\n";
     return $resultSet->fetch();
   }
 
-//$url = "http://localhost/projeto/participantes.php";
-//$array = json_decode(file_get_contents($url), true);
-//var_dump(sumAll($array,false));
-//var_dump(sumAll($array,true));
+if($debug) {
+  $url = "http://localhost/projeto/participantes.php?sp";
+  $array = json_decode(file_get_contents($url), true);
+//var_dump(implode(",",$array));
+  var_dump(sumAll($array,false));
+  var_dump(sumAll($array,true));
+}
 ?>
 

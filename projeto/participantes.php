@@ -15,11 +15,13 @@ require_once("goutte.phar");
 
 header("Content-type: application/json");
 
+$url = "http://ptt.br/particip/".$_SERVER['QUERY_STRING'];
+
 use Goutte\Client;
 $client = new Client();
 //$client->getClient()->setDefaultOption('config/curl/'.CURLOPT_TIMEOUT, 5);
 
-@$crawler = $client->request('GET', 'http://ptt.br/particip/sp');
+@$crawler = $client->request('GET', $url);
 $status_code = $client->getResponse()->getStatus();
 
 if($status_code==200){
